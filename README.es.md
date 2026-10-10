@@ -22,10 +22,34 @@
 
 | Superficie | Estado |
 |---|---|
+| Versiones DSH | **v1.3.0+** soporta DSH **0.2.0-rc.2+**; **v1.2.15 e inferiores** soporta DSH **0.1.x** (verificado 0.1.1 ~ 0.1.5; 0.1.7 no verificado; ver matriz de versiones abajo) |
 | Plataforma | Solo Web GUI (plugin de cliente; estado local del navegador; sin red, sin código nativo) |
 | Node | `>=20` |
 | Modelo | Cualquiera (no hace peticiones al modelo — comportamiento de UI puro) |
 | Idioma de la interfaz | 中文 / English (sigue el idioma de la app de DSH, se cambia en Ajustes) |
+
+### Matriz de versiones
+
+> ⚠️ **v1.3.0 es una actualización incompatible**: DSH 0.2.0 eliminó `@deepseek-ai/dsh-client-runtime`, por lo que el plugin migró a nuevos paquetes y ya no es compatible con DSH 0.1.x.
+
+| Versión DSH | Versión plugin recomendada | Notas |
+|-------------|---------------------------|-------|
+| 0.1.0-rc.6 ~ 0.1.5-rc.1 | **≤ 1.2.15** | Versión antigua usando `dsh-client-runtime` (0.1.7 no verificado) |
+| 0.1.7-rc.1+ | **No verificado** | Puede tener problemas de compatibilidad; se recomienda DSH 0.2.0+ |
+| 0.2.0-rc.2+ | **≥ 1.3.0** | Nueva versión migrada a `dsh-api-session-controller` + `dsh-session` |
+| 0.3.0+ | No verificado | Versiones futuras requieren re-adaptación |
+
+**Ejemplos de instalación**:
+
+```sh
+# Para usuarios de DSH 0.2.0+ (recomendado)
+dsh plugin --profile web add dsh-prompt-history@latest
+
+# Para usuarios de DSH 0.1.x (versión antigua, se recomienda 0.1.5 o inferior)
+dsh plugin --profile web add dsh-prompt-history@1.2.15
+```
+
+Ver [informe de auditoría de código](../dsh-doc/analysis/dsh-prompt-history-代码审计报告.md) para detalles.
 
 ## Qué obtienes
 

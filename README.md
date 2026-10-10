@@ -22,11 +22,34 @@
 
 | 表面 | 状态 |
 |---|---|
-| DSH 版本 | 实测通过 **0.1.1-rc.2 / 0.1.2-rc.1 / 0.1.5-rc.1**（web profile）；节点读取做了跨版本归一化（旧 `session.nodes` / 0.1.2 `legacy.nodes` / 2.0.x 桌面 `order`+store、`data.content`），桌面 2.0.x 一并兼容 |
+| DSH 版本 | **v1.3.0+** 支持 DSH **0.2.0-rc.2+**；**v1.2.15 及以下**支持 DSH **0.1.x**（实测 0.1.1 ~ 0.1.5，0.1.7 未验证；详见下方版本对照表） |
 | 平台 | 仅 Web GUI（客户端插件；状态存于浏览器本地；无网络请求、无原生代码） |
 | Node | `>=20` |
 | 模型 | 任意（不发起模型请求 —— 纯 UI 行为） |
 | 界面语言 | 中文 / English（跟随 DSH 应用语言，设置页可切换） |
+
+### 版本对照表
+
+> ⚠️ **v1.3.0 是一次破坏性升级**：由于 DSH 0.2.0 移除了 `@deepseek-ai/dsh-client-runtime` 包，插件迁移到了新的包结构，因此不再兼容 DSH 0.1.x。
+
+| DSH 版本 | 推荐插件版本 | 说明 |
+|---------|-------------|------|
+| 0.1.0-rc.6 ~ 0.1.5-rc.1 | **≤ 1.2.15** | 旧版本，使用 `dsh-client-runtime` 包（0.1.7 未验证） |
+| 0.1.7-rc.1+ | **未验证** | 可能存在兼容性问题，建议使用 DSH 0.2.0+ |
+| 0.2.0-rc.2+ | **≥ 1.3.0** | 新版本，迁移到 `dsh-api-session-controller` + `dsh-session` |
+| 0.3.0+ | 未验证 | 未来版本，需要重新适配 |
+
+**安装示例**：
+
+```sh
+# DSH 0.2.0+ 用户（推荐）
+dsh plugin --profile web add dsh-prompt-history@latest
+
+# DSH 0.1.x 用户（使用旧版本，建议 0.1.5 及以下）
+dsh plugin --profile web add dsh-prompt-history@1.2.15
+```
+
+详细说明参见 [代码审计报告](../dsh-doc/analysis/dsh-prompt-history-代码审计报告.md)。
 
 ## 你能得到什么
 
