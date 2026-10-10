@@ -101,19 +101,36 @@ export function ChatToc({ texts, onWiden }: ChatTocProps): JSX.Element {
     return () => { window.removeEventListener('resize', measure) }
   }, [measure])
 
-  // Draggable grip: mousedown starts a drag, mousemove moves it (clamped to
-  // the viewport), mouseup persists the position in localStorage so it stays
-  // where the user put it across reloads. The panel opens beside the current
-  // grip position instead of the scrollport edge.
+  // The sidebar column can be dragged narrower/wider or collapsed with no
+  // window resize, which would leave the pinned X behind; observing the
+  // scrollport re-measures it on every layout change. Re-armed whenever the
+  // measured left changes (observe() fires once on attach, so this settles
+  // after a single extra pass).
+  useEffect(() => {
+    const scrollport = document.querySelector<HTMLElement>('[data-conversation-scroll]')
+    if (scrollport === null) return
+    const observer = new ResizeObserver(() => { measure() })
+    observer.observe(scrollport)
+    return () => { observer.disconnect() }
+  }, [measure, origin.left])
+
+  // Vertically draggable grip: mousedown starts a drag, mousemove moves it up
+  // and down (clamped to the viewport), mouseup persists the height in
+  // localStorage so it stays where the user put it across reloads. The X axis
+  // is NOT draggable — the grip is pinned to the left Sidebar's outer edge — so
+  // only the vertical position is stored; legacy {left, top} records keep
+  // loading, with their left ignored.
   const POS_KEY = 'dsh-prompt-history.tocPos'
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
-  const dragRef = useRef<{ startX: number; startY: number; baseLeft: number; baseTop: number } | null>(null)
+  const [posTop, setPosTop] = useState<number | null>(null)
+  const dragRef = useRef<{ startY: number; baseTop: number } | null>(null)
   const movedRef = useRef(false)
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(POS_KEY)
-      if (raw !== null) setPos(JSON.parse(raw) as { left: number; top: number })
+      if (raw === null) return
+      const parsed = JSON.parse(raw) as { top?: unknown }
+      if (typeof parsed.top === 'number' && Number.isFinite(parsed.top)) setPosTop(parsed.top)
     } catch { /* corrupt saved position: fall back to the default */ }
   }, [])
 
@@ -141,26 +158,26 @@ export function ChatToc({ texts, onWiden }: ChatTocProps): JSX.Element {
 
   const startDrag = (e: ReactMouseEvent): void => {
     e.preventDefault() // no text selection while dragging
-    dragRef.current = { startX: e.clientX, startY: e.clientY, baseLeft: pos?.left ?? origin.left + 6, baseTop: pos?.top ?? gripY() - 26 }
+    dragRef.current = { startY: e.clientY, baseTop: posTop ?? gripY() - 26 }
     movedRef.current = false
   }
   const gripY = (): number => Math.round((origin.top + origin.bottom) / 2)
   const onDragMove = useCallback((e: MouseEvent): void => {
     const drag = dragRef.current
     if (drag === null) return
-    if (Math.abs(e.clientX - drag.startX) > 4 || Math.abs(e.clientY - drag.startY) > 4) movedRef.current = true
-    const left = Math.min(Math.max(4, drag.baseLeft + e.clientX - drag.startX), window.innerWidth - 24)
+    // Vertical-only: a purely horizontal movement is not a drag, and the grip
+    // never moves sideways regardless of where the pointer goes.
+    if (Math.abs(e.clientY - drag.startY) > 4) movedRef.current = true
     const top = Math.min(Math.max(4, drag.baseTop + e.clientY - drag.startY), window.innerHeight - 56)
-    setPos({ left, top })
+    setPosTop(top)
   }, [])
   const endDrag = useCallback((): void => {
     if (dragRef.current === null) return
     dragRef.current = null
     try {
-      const current = pos
-      if (current !== null) localStorage.setItem(POS_KEY, JSON.stringify(current))
+      if (posTop !== null) localStorage.setItem(POS_KEY, JSON.stringify({ top: posTop }))
     } catch { /* storage unavailable */ }
-  }, [pos])
+  }, [posTop])
 
   // Resizable panel: a bottom-right corner handle drags the width/height
   // (clamped), persisted in localStorage so the user's size survives reloads.
@@ -212,8 +229,13 @@ export function ChatToc({ texts, onWiden }: ChatTocProps): JSX.Element {
     }
   }, [onDragMove, onResizeMove, endDrag, endResize])
 
-  const gripLeft = pos?.left ?? origin.left + 6
-  const gripTop = pos?.top ?? gripY() - 26
+  // X is pinned to the left Sidebar's outer edge: the shell grid places the
+  // sidebar column immediately left of the centre column, and the conversation
+  // scrollport fills that centre column with no leading inset — so its left
+  // edge IS the sidebar's outer boundary (plus a fixed gap). Only Y is moved
+  // by the user.
+  const gripLeft = origin.left + 6
+  const gripTop = posTop ?? gripY() - 26
 
   // The panel is anchored to the grip like a context menu: it sits to the
   // grip's right, vertically centered on it, and is clamped so the box always

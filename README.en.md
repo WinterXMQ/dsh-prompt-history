@@ -63,7 +63,7 @@ See [code audit report](../dsh-doc/analysis/dsh-prompt-history-代码审计报�
    - **Auto** (terminal-style): copies the selection straight to the system clipboard on select.
 5. **Right-click pastes directly** — a right-click on the composer pastes the clipboard — no context menu, like a Linux terminal. Paste runs the same pipeline as Ctrl+V (images and reference chips behave identically), with a Clipboard API fallback when the execCommand path is blocked.
 6. **Cross-session history** (Settings toggle, default off) — keeps Up/Down history across sessions, stored in browser localStorage (cap 200), survives reloads and session switches.
-7. **Chat TOC (conversation directory)** — when the conversation gets long, a subtle semi-transparent, draggable grip on the chat's left edge (brightens on hover) expands a directory of every user message in order — click any entry to jump to that spot, and scroll through all entries when the list gets long; click outside or press Esc to close. Can be toggled off in Settings.
+7. **Chat TOC (conversation directory)** — when the conversation gets long, a subtle semi-transparent, vertically draggable grip on the chat's left edge (brightens on hover) expands a directory of every user message in order — click any entry to jump to that spot, and scroll through all entries when the list gets long; click outside or press Esc to close. Can be toggled off in Settings.
 
 Pure UI behavior: no session events, no agent-loop changes, no model requests. Recalled or quoted text only enters the ordinary composer draft — it reaches the model only if *you* press Enter.
 
@@ -90,7 +90,7 @@ Open **Settings → `>_ Terminal Input`** (stored in browser localStorage, effec
 |---|---|---|
 | Copy mode (on selection) | `Toolbar copy` | `Toolbar` (recommended; writes the clipboard only on click) / `Auto copy on select` (terminal-style) |
 | Cross-session history | Off | Up/Down history persists across sessions in browser localStorage (cap 200) |
-| Chat TOC | On | Show the draggable grip on the chat left edge; can be turned off |
+| Chat TOC | On | Show the vertically draggable grip on the chat left edge (its X is pinned to the sidebar's outer edge); can be turned off |
 | Right-click paste | On | Off restores the browser's native context menu |
 
 Up/Down history is always on, independent of these switches.
